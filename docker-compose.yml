@@ -1,0 +1,40 @@
+version: "3.9"
+
+services:
+  db:
+    image: postgres:16
+    container_name: scraper-db
+    restart: always
+    env_file:
+      - .env
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    volumes:
+      - db_data:/var/lib/postgresql/data
+      - ./sql:/docker-entrypoint-initdb.d
+    ports:
+      - "5432:5432"
+
+  app:
+    build: .
+    container_name: scraper-app
+    restart: always
+    depends_on:
+      - db
+    env_file:
+      - .env
+    working_dir: /app
+    volumes:
+      - ./data:/app/data
+      - ./downloads:/app/downloads
+      - ./logs:/app/logs
+      - ./frontend:/app/frontend
+    ports:
+      - "5000:5000"
+    command: >
+      sh -c "python scheduler.py & python api/json_api_server.py"
+
+volumes:
+  db_data:
