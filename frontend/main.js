@@ -1,5 +1,5 @@
 // frontend/main.js
-// Usa el mismo origen donde se sirve la pagina HTML
+// Usa el mismo origen donde se sirve la pagina para evitar problemas de CORS (127.0.0.1 vs localhost)
 const API_BASE = window.location.origin;
 window.API_BASE = API_BASE;
 
@@ -94,5 +94,5 @@ async function downloadPdfReport(productId) {
   }
 }
 
-// Hacer la función accesible globalmente para los botones de fila
+// Hacemos la función accesible globalmente para los botones de fila
 window.downloadPdfReport = downloadPdfReport;

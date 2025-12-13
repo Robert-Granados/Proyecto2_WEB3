@@ -19,6 +19,7 @@ services:
 
   app:
     build: .
+    image: scraper-app:latest
     container_name: scraper-app
     restart: always
     depends_on:
