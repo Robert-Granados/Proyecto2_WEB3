@@ -11,4 +11,7 @@ selenium==4.24.0
 python-dateutil==2.9.0.post0
 fpdf==1.7.2
 Pillow==10.1.0
-openai==1.99.9
+
+# Use modern OpenAI client (v1+). Pin to a compatible release range.
+openai>=1.0.0,<3.0.0
+

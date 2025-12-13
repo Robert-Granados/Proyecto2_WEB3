@@ -3,7 +3,11 @@ import logging
 import os
 from typing import Iterable, List
 
-import openai
+from openai import OpenAI
+try:
+    from openai.error import APIError, RateLimitError, OpenAIError
+except Exception:
+    APIError = RateLimitError = OpenAIError = Exception
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -35,7 +39,7 @@ def get_dynamic_selectors(html: str, fallback: Iterable[str]) -> List[str]:
     if cache_key in selector_cache:
         return selector_cache[cache_key] + selectors
 
-    openai.api_key = OPENAI_API_KEY
+    client = OpenAI(api_key=OPENAI_API_KEY)
     prompt = (
         "Te paso un fragmento HTML y necesito que me devuelvas 3 selectores CSS válidos "
         "que capturen los contenedores principales de producto en la página de MercadoLibre. "
@@ -45,11 +49,9 @@ def get_dynamic_selectors(html: str, fallback: Iterable[str]) -> List[str]:
     )
 
     try:
-        response = openai.ChatCompletion.create(
+        response = client.chat.completions.create(
             model=OPENAI_MODEL,
-            messages=[
-                {"role": "user", "content": prompt},
-            ],
+            messages=[{"role": "user", "content": prompt}],
             temperature=0.2,
             n=1,
         )
@@ -59,6 +61,6 @@ def get_dynamic_selectors(html: str, fallback: Iterable[str]) -> List[str]:
             return selectors
         selector_cache[cache_key] = generated
         return generated + selectors
-    except openai.error.OpenAIError as exc:
+    except (APIError, RateLimitError, OpenAIError) as exc:
         logger.warning("OpenAI selector helper falló: %s", exc)
         return selectors
